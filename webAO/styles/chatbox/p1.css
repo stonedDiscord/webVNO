@@ -38,10 +38,10 @@
 	width: 94%;
 	height: 30%;
 	width: calc(94% - 2em);
-	border-color: #778877;
+	border-color: #443;
 	border-style: solid;
     border-width: 1em;
-    font-family: "Courier";
+    font-family: "MS Gothic";
 }
 
 #client_name {
@@ -79,4 +79,39 @@
 	line-height: 0.5;
 	color: transparent;
 	animation: wait_pulse 0.5s linear;
+}
+
+#client_clock {
+    display: block;
+    position: absolute;
+	right: 1%;
+    top: 3%;
+    width: 20%;
+    height: 10%;
+    background: #111;
+    border: 2px outset #555;
+    text-align: left;
+}
+
+#client_clockdecoration {
+    display: inline-block;
+    height: 100%;
+    width: 38%;
+
+}
+
+#client_date {
+    position: absolute;
+    margin: 0;
+    top: 0;
+    left: 42%;
+}
+
+
+#client_time {
+    position: absolute;
+    margin: 0;
+    bottom: 0;
+    right: 2%;
+    text-align: right;
 }
