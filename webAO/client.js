@@ -5,6 +5,8 @@
 */
 
 import Fingerprint2 from 'fingerprintjs2';
+import IPFS from 'ipfs';
+const { Buffer } = IPFS;
 
 import { escapeChat, encodeChat, prepChat, safe_tags } from './encoding.js';
 
@@ -41,6 +43,7 @@ const MUSIC_HOST = AO_HOST + "sounds/music/";
 const UPDATE_INTERVAL = 60;
 
 const transparentPNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
 /**
  * Toggles AO1-style loading using paginated music packets for mobile platforms.
  * The old loading uses more smaller packets instead of a single big one,
@@ -2379,6 +2382,45 @@ async function request(url) {
 		xhr.open("GET", url, true);
 		xhr.send();
 	});
+}
+
+ipfs_setup();
+
+async function ipfs_setup() {
+	const node = await IPFS.create({
+		repo: 'ipfs-' + Math.random(),
+		config: {
+			Addresses: {
+				Swarm: [
+					// This is a public webrtc-star server
+					'/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+					'/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+					'/ip4/127.0.0.1/tcp/13579/wss/p2p-webrtc-star'
+				]
+			},
+		}
+	});
+
+    console.log('IPFS node is ready');
+
+	const { id, agentVersion, protocolVersion } = await node.id();
+	
+	console.log('IPFS is ready');
+
+    const cid = "QmQ8oJzxB8tRJa2UsrTvJBcvJmS8h9sz5uN4V2AbihmopF";
+
+    let bufs = [];
+
+    for await (const buf of node.cat(cid)) {
+      bufs.push(buf);
+    }
+
+    const data = Buffer.concat(bufs);
+	
+	const file = new window.Blob([data], { type: 'application/octet-binary' });
+	const url = window.URL.createObjectURL(file);
+
+	console.warn(url);
 }
 
 /**
