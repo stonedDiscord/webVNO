@@ -6,6 +6,9 @@
 
 import Fingerprint2 from 'fingerprintjs2';
 import IPFS from 'ipfs';
+import libp2pConfig from './libp2p-configuration';
+import PeerId from 'peer-id';
+
 const { Buffer } = IPFS;
 
 import { escapeChat, encodeChat, prepChat, safe_tags } from './encoding.js';
@@ -34,9 +37,9 @@ location.search.substr(1).split("&").forEach(function (item) {
 const serverIP = queryDict.ip;
 let mode = queryDict.mode;
 
-// Unless there is an asset URL specified, use the wasabi one
-const DEFAULT_HOST = location.hostname ? "https://webao-full.animatedchatroom.net/base/" : "base/";
-const AO_HOST = queryDict.asset || DEFAULT_HOST;
+const BootstrapNode = '/ip4/87.239.250.197/tcp/4010/ws/p2p/QmauJ2cTdQiyzd7E3QqDtPX7LLSYiJLnLjvRa4HtrJb2xq';
+const AO_HOST = "QmQA8xshtWveXG2uLNyFjNmzs9npvQM1voah8DDMnRXzeA";
+
 const THEME = queryDict.theme || "default";
 const MUSIC_HOST = AO_HOST + "sounds/music/";
 
@@ -2387,8 +2390,7 @@ async function request(url) {
 ipfs_setup();
 
 async function ipfs_setup() {
-	const node = await IPFS.create({
-		repo: 'ipfs-' + Math.random(),
+	const node = await await IPFS.create({
 		config: {
 			Addresses: {
 				Swarm: [
@@ -2398,16 +2400,34 @@ async function ipfs_setup() {
 					'/ip4/127.0.0.1/tcp/13579/wss/p2p-webrtc-star'
 				]
 			},
-		}
+			Discovery: {
+				MDNS: {
+					Enabled: true
+				},
+				webRTCStar: {
+					Enabled: true
+				}
+			},
+			Bootstrap: [
+				BootstrapNode
+			]
+		},
+		preload: {
+			enabled: true
+		},
+		libp2p: libp2pConfig
 	});
-
-    console.log('IPFS node is ready');
+	
+	console.log('IPFS node is ready');
+	
+	await this.ipfs.swarm.connect(BootstrapNode);
+    console.log('Connected!');
 
 	const { id, agentVersion, protocolVersion } = await node.id();
 	
 	console.log('IPFS is ready');
 
-    const cid = "QmQ8oJzxB8tRJa2UsrTvJBcvJmS8h9sz5uN4V2AbihmopF";
+    const cid = "QmQA8xshtWveXG2uLNyFjNmzs9npvQM1voah8DDMnRXzeA/characters/phoenix/char.ini";
 
     let bufs = [];
 
