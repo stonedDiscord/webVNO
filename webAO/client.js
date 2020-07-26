@@ -37,7 +37,6 @@ location.search.substr(1).split("&").forEach(function (item) {
 const serverIP = queryDict.ip;
 let mode = queryDict.mode;
 
-const BootstrapNode = '/ip4/87.239.250.197/tcp/4010/ws/p2p/QmauJ2cTdQiyzd7E3QqDtPX7LLSYiJLnLjvRa4HtrJb2xq';
 const AO_HOST = "QmQA8xshtWveXG2uLNyFjNmzs9npvQM1voah8DDMnRXzeA";
 
 const THEME = queryDict.theme || "default";
@@ -2390,7 +2389,9 @@ async function request(url) {
 ipfs_setup();
 
 async function ipfs_setup() {
-	const node = await await IPFS.create({
+	const BootstrapNode = '/ip4/87.239.250.197/tcp/4010/ws/p2p/QmauJ2cTdQiyzd7E3QqDtPX7LLSYiJLnLjvRa4HtrJb2xq';
+
+	const node = await IPFS.create({
 		config: {
 			Addresses: {
 				Swarm: [
