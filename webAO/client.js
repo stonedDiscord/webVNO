@@ -38,6 +38,7 @@ const serverIP = queryDict.ip;
 let mode = queryDict.mode;
 
 const AO_HOST = "QmQA8xshtWveXG2uLNyFjNmzs9npvQM1voah8DDMnRXzeA";
+let node;
 
 const THEME = queryDict.theme || "default";
 const MUSIC_HOST = AO_HOST + "sounds/music/";
@@ -712,7 +713,7 @@ class Client extends EventEmitter {
 
 			// If the ini doesn't exist on the server this will throw an error
 			try {
-				const cinidata = await request(AO_HOST + "characters/" + encodeURI(chargs[0].toLowerCase()) + "/char.ini");
+				const cinidata = await ipfs_get(AO_HOST + "/characters/" + encodeURI(chargs[0].toLowerCase()) + "/char.ini");
 				cini = INI.parse(cinidata);
 			} catch (err) {
 				cini = {};
@@ -2391,22 +2392,17 @@ ipfs_setup();
 async function ipfs_setup() {
 	const BootstrapNode = '/ip4/87.239.250.197/tcp/4010/ws/p2p/QmauJ2cTdQiyzd7E3QqDtPX7LLSYiJLnLjvRa4HtrJb2xq';
 
-	const node = await IPFS.create({
+	node = await IPFS.create({
 		config: {
 			Addresses: {
-				Swarm: [
-					// This is a public webrtc-star server
-					'/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
-					'/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
-					'/ip4/127.0.0.1/tcp/13579/wss/p2p-webrtc-star'
-				]
+				Swarm: []
 			},
 			Discovery: {
 				MDNS: {
-					Enabled: true
+					Enabled: false
 				},
 				webRTCStar: {
-					Enabled: true
+					Enabled: false
 				}
 			},
 			Bootstrap: [
@@ -2414,14 +2410,14 @@ async function ipfs_setup() {
 			]
 		},
 		preload: {
-			enabled: true
+			enabled: false
 		},
 		libp2p: libp2pConfig
 	});
 	
 	console.log('IPFS node is ready');
 	
-	await this.ipfs.swarm.connect(BootstrapNode);
+	await node.swarm.connect(BootstrapNode);
     console.log('Connected!');
 
 	const { id, agentVersion, protocolVersion } = await node.id();
@@ -2430,19 +2426,23 @@ async function ipfs_setup() {
 
     const cid = "QmQA8xshtWveXG2uLNyFjNmzs9npvQM1voah8DDMnRXzeA/characters/phoenix/char.ini";
 
-    let bufs = [];
-
-    for await (const buf of node.cat(cid)) {
-      bufs.push(buf);
-    }
-
-    const data = Buffer.concat(bufs);
+	const data = ipfs_get(cid);
+	
+	console.warn(data);
 	
 	const file = new window.Blob([data], { type: 'application/octet-binary' });
 	const url = window.URL.createObjectURL(file);
 
 	console.warn(url);
 }
+
+async function ipfs_get (cid) {
+	for await (const data of node.cat(cid)) {
+		return Promise.resolve(data.toString());
+	}
+  }
+
+window.ipfs_get = ipfs_get;
 
 /**
  * Checks if a file exists at the specified URI.
