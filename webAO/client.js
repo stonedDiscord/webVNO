@@ -2426,14 +2426,8 @@ async function ipfs_setup() {
 
     const cid = "QmQA8xshtWveXG2uLNyFjNmzs9npvQM1voah8DDMnRXzeA/characters/phoenix/char.ini";
 
-	const data = ipfs_get(cid);
-	
-	console.warn(data);
-	
-	const file = new window.Blob([data], { type: 'application/octet-binary' });
-	const url = window.URL.createObjectURL(file);
-
-	console.warn(url);
+	const peers = await node.swarm.peers();
+	console.log("Connected peers: " + peers.length);
 }
 
 async function ipfs_get (cid) {
