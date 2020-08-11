@@ -2847,3 +2847,19 @@ export function toggleShout(shout) {
 	}
 }
 window.toggleShout = toggleShout;
+
+export function updateClock() {
+	const date_div = document.getElementById("client_date");
+	const time_div = document.getElementById("client_time");
+
+	const date_object = new Date();
+	const hour = date_object.getHours();
+	const min  = date_object.getMinutes();
+	const month= date_object.getMonth();
+	const day  = date_object.getDay();	
+
+	date_div.innerHTML = month + "/" + day;
+	time_div.innerHTML = hour + ":" + min;
+}
+
+window.updateClock = updateClock;
