@@ -129,3 +129,11 @@
 		right: 0.6em;
 	}
 }
+
+#client_clock {
+	display: none;
+}
+
+#client_trackstatus {
+	display: none;
+}

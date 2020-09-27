@@ -97,3 +97,11 @@
 		right: 0;
 	}
 }
+
+#client_clock {
+	display: none;
+}
+
+#client_trackstatus {
+	display: none;
+}

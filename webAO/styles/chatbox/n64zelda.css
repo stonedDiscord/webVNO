@@ -103,3 +103,11 @@
         text-shadow: 0 0 0.2em #3282ff;
 	}
 }
+
+#client_clock {
+	display: none;
+}
+
+#client_trackstatus {
+	display: none;
+}

@@ -69,3 +69,11 @@
 	left: 2%;
 	bottom: 2%;
 }
+
+#client_clock {
+	display: none;
+}
+
+#client_trackstatus {
+	display: none;
+}

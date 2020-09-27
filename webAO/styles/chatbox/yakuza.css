@@ -97,3 +97,11 @@
 	background-size: contain;
 	transition: opacity 0.2s;
 }
+
+#client_clock {
+	display: none;
+}
+
+#client_trackstatus {
+	display: none;
+}
