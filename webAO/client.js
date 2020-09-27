@@ -514,17 +514,11 @@ class Client extends EventEmitter {
 		console.debug("S: " + msg);
 
 		const lines = msg.split("%");
+		const args = lines[0].split("#");
+		const header = args[0];
 
-		for (const msg of lines) {
-			if(msg === "")
-				break;
-			
-			const args = msg.split("#");
-			const header = args[0];
-	
-			if (!this.emit(header, args)) {
-				console.warn(`Invalid packet header ${header}`);
-			}
+		if (!this.emit(header, args)) {
+			console.warn(`Invalid packet header ${header}`);
 		}
 	}
 
