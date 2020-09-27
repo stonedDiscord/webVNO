@@ -105,3 +105,32 @@
 #client_chatwaiting {
 	display: none;
 }
+
+#client_clock {
+	position: absolute;
+	top: 2%;
+	right: 7%;
+	width: 25%;
+	height: 5%;
+}
+
+#client_date {
+	font-weight: bold;
+	border: 0.1em solid #2a2a2a;
+	background-color: #2a2a2a;
+	border-radius: 5%;
+	line-height: 75%;
+	margin: 0;
+}
+
+#client_daytime {
+	position: relative;
+	top: 0;
+	left: 25%;
+	margin: 0;
+	text-shadow: -0.1em 0 #2a2a2a, 0 0.1em #2a2a2a, 0.1em 0 #2a2a2a, 0 -0.1em #2a2a2a;
+}
+
+#client_time {
+	display: none;
+}
