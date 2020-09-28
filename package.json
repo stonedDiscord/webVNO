@@ -1,7 +1,7 @@
 {
-  "name": "webao",
-  "version": "2.6.0",
-  "description": "Web-based Attorney Online client",
+  "name": "webvno",
+  "version": "2.3.0",
+  "description": "Web-based Visual Novel Online client",
   "main": "client.js",
   "scripts": {
     "babel": "babel ui.js -o ui.b.js",
@@ -13,13 +13,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AttorneyOnline/webAO.git"
+    "url": "git+https://github.com/stonedDiscord/webVNO.git"
   },
   "author": "stonedDiscord",
   "bugs": {
-    "url": "https://github.com/AttorneyOnline/webAO/issues"
+    "url": "https://github.com/stonedDiscord/webVNO/issues"
   },
-  "homepage": "https://github.com/AttorneyOnline/webAO#readme",
+  "homepage": "https://github.com/stonedDiscord/webVNO#readme",
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",
