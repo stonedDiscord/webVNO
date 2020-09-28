@@ -1,4 +1,4 @@
-const MASTERSERVER_IP = "master.aceattorneyonline.com:27014";
+const MASTERSERVER_IP = "127.0.0.1:5999/52.73.41.179:6543";
 import { version } from '../package.json';
 
 import Fingerprint2 from 'fingerprintjs2';
@@ -75,11 +75,7 @@ export function setServ(ID) {
 window.setServ = setServ;
 
 function onOpen(_e) {
-	console.log(`Your emulated HDID is ${hdid}`);
-	masterserver.send(`ID#webAO#webAO#%`);
-
-	masterserver.send("ALL#%");
-	masterserver.send("VC#%");
+	console.log(`Connected!`);
 }
 
 /**
@@ -136,32 +132,51 @@ function onMessage(e) {
 	const header = msg.split("#", 2)[0];
 	console.debug(msg);
 
-	if (header === "ALL") {
-		const servers = msg.split("#").slice(1);
-		for (let i = 0; i < servers.length - 1; i++) {
-			const serverEntry = servers[i];
-			const args = serverEntry.split("&");
-			const ipport = args[2] + ":" + args[3];
-			const asset = args[4] ? `&asset=${args[4]}` : "";
-			const liclass = lowMemory ? "" : "unavailable"; // don't hide the entries if we're not checking them
+	if (header === "SDP") {
+		const args = msg.split("#").slice(1);
+		const serverID = args[0];
+		const serverName = args[1];
+		const ipport = args[2] + ":" + args[3];
+		const desc = args[4];
+		const asset = args[5];
 
 			document.getElementById("masterlist").innerHTML +=
-				`<li id="server${i}" class="${liclass}" onmouseover="setServ(${i})"><p>${args[0]}</p>`
+				`<li id="server${i}" class="" onmouseover="setServ(${args[0]})"><p>${serverName}</p>`
 				+ `<a class="button" href="client.html?mode=watch&ip=${ipport}${asset}">Watch</a>`
 				+ `<a class="button" href="client.html?mode=join&ip=${ipport}${asset}">Join</a></li>`;
-			server_description[i] = args[1];
-			if (!lowMemory)
-				setTimeout(() => checkOnline(i, ipport), 0);
-		}
-		masterserver.close();
+			server_description[args[0]] = desc;
+
+		masterserver.send(`RPS#${serverID+1}#%`);
 	}
-	else if (header === "servercheok") {
-		const args = msg.split("#").slice(1);
-		document.getElementById("clientinfo").innerHTML = `Client version: ${version} expected: ${args[0]}`;
+	else if (header === "CV") {
+		document.getElementById("clientinfo").innerHTML = `Client version: ${version}`;
+		masterserver.send(`VER#C#${version.substr(0,3)}#%`);
 	}
-	else if (header === "SV") {
+	else if (header === "VEROK") {
 		const args = msg.split("#").slice(1);
-		document.getElementById("serverinfo").innerHTML = `Master server version: ${args[0]}`;
+		document.getElementById("serverinfo").innerHTML = `Master server info: ${args[0]}`;
+		masterserver.send("VIP#%");
+	}
+	else if (header === "VIPB") {
+		const args = msg.split("#").slice(1);
+		masterserver.send("VIPG#%");
+	}
+	else if (header === "VIPG") {
+		const args = msg.split("#").slice(1);
+		masterserver.send("VIPR#%");
+	}
+	else if (header === "VIPR") {
+		const args = msg.split("#").slice(1);
+		masterserver.send("VIPA#%");
+	}
+	else if (header === "VIPA") {
+		const args = msg.split("#").slice(1);
+		masterserver.send("CoH#%");
+	}
+	else if (header === "CoH") {
+		const args = msg.split("#").slice(1);
+		masterserver.send("RPS#0#%");
+		masterserver.send("CO#test#098F6BCD4621D373CADE4E832627B4F6#%");
 	}
 	else if (header === "CT") {
 		const args = msg.split("#").slice(1);
