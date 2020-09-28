@@ -1,4 +1,5 @@
-const MASTERSERVER_IP = "127.0.0.1:5999/52.73.41.179:6543";
+const wsproxy = "127.0.0.1:5999/";
+const MASTERSERVER_IP = wsproxy + "52.73.41.179:6543";
 import { version } from '../package.json';
 
 import Fingerprint2 from 'fingerprintjs2';
@@ -134,19 +135,19 @@ function onMessage(e) {
 
 	if (header === "SDP") {
 		const args = msg.split("#").slice(1);
-		const serverID = args[0];
+		const serverID = Number(args[0]);
 		const serverName = args[1];
-		const ipport = args[2] + ":" + args[3];
+		const ipport = wsproxy + args[2] + ":" + args[3];
 		const desc = args[4];
-		const asset = args[5];
+		const asset = "&asset=" + args[5];
 
 			document.getElementById("masterlist").innerHTML +=
-				`<li id="server${i}" class="" onmouseover="setServ(${args[0]})"><p>${serverName}</p>`
+				`<li id="server${serverID}" class="" onmouseover="setServ(${serverID})"><p>${serverName}</p>`
 				+ `<a class="button" href="client.html?mode=watch&ip=${ipport}${asset}">Watch</a>`
 				+ `<a class="button" href="client.html?mode=join&ip=${ipport}${asset}">Join</a></li>`;
-			server_description[args[0]] = desc;
-
-		masterserver.send(`RPS#${serverID+1}#%`);
+			server_description[serverID] = desc;
+		const nextserverID = serverID + 1;
+		masterserver.send(`RPS#${nextserverID}#%`);
 	}
 	else if (header === "CV") {
 		document.getElementById("clientinfo").innerHTML = `Client version: ${version}`;
