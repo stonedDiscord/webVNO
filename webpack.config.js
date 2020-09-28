@@ -4,12 +4,12 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        ui: './webAO/ui.js',
-        client: './webAO/client.js',
-        master: './webAO/master.js'
+        ui: './webVNO/ui.js',
+        client: './webVNO/client.js',
+        master: './webVNO/master.js'
     },
     output: {
-        path: path.resolve(__dirname, 'webAO'),
+        path: path.resolve(__dirname, 'webVNO'),
         filename: '[name].b.js'
     },
     module: {
