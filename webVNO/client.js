@@ -178,17 +178,15 @@ class Client extends EventEmitter {
 		this.on("MC", this.handleMC.bind(this));
 		this.on("RMC", this.handleRMC.bind(this));
 		this.on("CAD", this.handleCAD.bind(this));
-		this.on("SC", this.handleSC.bind(this));
 		this.on("EI", this.handleEI.bind(this));
 		this.on("FL", this.handleFL.bind(this));
-		this.on("LE", this.handleLE.bind(this));
-		this.on("EM", this.handleEM.bind(this));
-		this.on("SM", this.handleSM.bind(this));
+		this.on("AD", this.handleAD.bind(this));
+		this.on("MD", this.handleMD.bind(this));
 		this.on("MM", this.handleMM.bind(this));
 		this.on("BD", this.handleBD.bind(this));
 		this.on("KB", this.handleKB.bind(this));
 		this.on("KK", this.handleKK.bind(this));
-		this.on("DONE", this.handleDONE.bind(this));
+		this.on("LCA", this.handleLCA.bind(this));
 		this.on("BN", this.handleBN.bind(this));
 		this.on("HP", this.handleHP.bind(this));
 		this.on("RT", this.handleRT.bind(this));
@@ -852,26 +850,11 @@ class Client extends EventEmitter {
 	 */
 	handleCAD(args) {
 				document.getElementById("client_loadingtext").innerHTML = `Loading Character ${args[1]}/${this.char_list_length}`;
-				setTimeout(() => this.handleCharacterInfo((args[2]+"&").split('&'), args[1]), args[1]*10);
-				setTimeout(() => this.handleCharacterInfo((args[5]+"&").split('&'), args[4]), args[4]*10);
-		this.sendServer("RCD#" + (args[4]+1) + "#%");
-	}
-
-	/**
-	 * Handles incoming character information, containing all characters
-	 * in one packet.
-	 * @param {Array} args packet arguments
-	 */
-	handleSC(args) {
-		document.getElementById("client_loadingtext").innerHTML = "Loading Characters";
-		for (let i = 1; i < args.length; i++) {
-			document.getElementById("client_loadingtext").innerHTML = `Loading Character ${i}/${this.char_list_length}`;
-			const chargs = args[i].split("&");
-			const charid = i - 1;
-			setTimeout(() => this.handleCharacterInfo(chargs, charid), charid*10);
-		}
-		// We're done with the characters, request the music
-		this.sendServer("RM#%");
+				const char1 = Number(args[1]);
+				setTimeout(() => this.handleCharacterInfo((args[2]+"&").split('&'), char1), char1*10);
+				const char2 = Number(args[4]);
+				setTimeout(() => this.handleCharacterInfo((args[5]+"&").split('&'), char2), char2*10);
+		this.sendServer("RCD#" + (char2+1) + "#%");
 	}
 
 	/**
@@ -887,32 +870,38 @@ class Client extends EventEmitter {
 	}
 
 	/**
-	 * Handles incoming evidence list, all evidences at once
-	 * item per packet.
+	 * Handles incoming area list
+	 * 1 item per packet.
 	 * 
 	 * @param {Array} args packet arguments
 	 */
-	handleLE(args) {
-		this.evidences = [];
-		for (let i = 1; i < args.length - 1; i++) {
-			const arg = args[i].split("&");
-			this.evidences[i - 1] = {
-				name: prepChat(arg[0]),
-				desc: prepChat(arg[1]),
-				filename: safe_tags(arg[2]),
-				icon: AO_HOST + "evidence/" + encodeURI(arg[2].toLowerCase())
-			};
-		}
+	handleAD(args) {
+		const areaID = Number(args[1]);
+		document.getElementById("client_loadingtext").innerHTML = `Loading Area ${areaID}/${this.area_list_length}`;
+		const thisarea = {
+			name: safe_tags(args[2]),
+			players: 0,
+			status: "IDLE",
+			cm: "",
+			locked: "FREE"
+		};
 
-		const evidence_box = document.getElementById("evidences");
-		evidence_box.innerHTML = "";
-		for (let i = 1; i <= this.evidences.length; i++) {
-			evidence_box.innerHTML += `<img src="${this.evidences[i - 1].icon}" 
-				id="evi_${i}" 
-				alt="${this.evidences[i - 1].name}"
-				class="evi_icon"
-				onclick="pickEvidence(${i})">`;
-		}
+		this.areas.push(thisarea);
+
+		// Create area button
+		let newarea = document.createElement("SPAN");
+		newarea.classList = "area-button area-default";
+		newarea.id = "area" + areaID;
+		newarea.innerText = thisarea.name;
+		newarea.title = "Players: <br>" +
+			"Status: <br>" +
+			"CM: ";
+		newarea.onclick = function () {
+			area_click(this);
+		};
+
+		document.getElementById("areas").appendChild(newarea);
+		this.sendServer("RAD#" + (areaID+1) + "#%");
 	}
 
 	resetMusiclist() {
@@ -922,49 +911,12 @@ class Client extends EventEmitter {
 		document.getElementById("areas").innerHTML = "";		
 	}
 
-	isAudio(trackname) {
-		if (/\.(?:wav|mp3|mp4|ogg|opus)$/i.test(trackname) || // regex for file extenstions
-			trackname.startsWith("=") ||
-			trackname.startsWith("-"))   // category markers
-		{
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	handleMusicInfo(trackindex,trackname) {
-		if (this.isAudio(trackname)) {
 			// After reached the audio put everything in the music list
 			const newentry = document.createElement("OPTION");
 			newentry.text = trackname;
 			document.getElementById("client_musiclist").options.add(newentry);
 			this.musics.push(trackname);
-		} else {
-			const thisarea = {
-				name: trackname,
-				players: 0,
-				status: "IDLE",
-				cm: "",
-				locked: "FREE"
-			};
-
-			this.areas.push(thisarea);
-
-			// Create area button
-			let newarea = document.createElement("SPAN");
-			newarea.classList = "area-button area-default";
-			newarea.id = "area" + trackindex;
-			newarea.innerText = thisarea.name;
-			newarea.title = "Players: <br>" +
-				"Status: <br>" +
-				"CM: ";
-			newarea.onclick = function () {
-				area_click(this);
-			};
-
-			document.getElementById("areas").appendChild(newarea);
-		}
 	}
 
 	/**
@@ -972,39 +924,18 @@ class Client extends EventEmitter {
 	 * per packet.
 	 * @param {Array} args packet arguments
 	 */
-	handleEM(args) {
+	handleMD(args) {
 		document.getElementById("client_loadingtext").innerHTML = "Loading Music";
-		if(args[1] === "0") {
+		if(args[1] === "1") {
 			this.resetMusiclist();
 		}
-
-		for (let i = 2; i < args.length - 1; i++) {
-			if (i % 2 === 0) {
-				document.getElementById("client_loadingtext").innerHTML = `Loading Music ${args[1]}/${this.music_list_length}`;
-				this.handleMusicInfo(args[i-1],safe_tags(args[i]));
-			}
-		}
+		const musicID = Number(args[1]);
+		
+		document.getElementById("client_loadingtext").innerHTML = `Loading Music ${musicID}/${this.music_list_length}`;
+		this.handleMusicInfo(musicID,safe_tags(args[2]));
 
 		// get the next batch of tracks
-		this.sendServer("AM#" + ((args[1] / 10) + 1) + "#%");
-	}
-
-	/**
-	 * Handles incoming music information, containing all music in one packet.
-	 * @param {Array} args packet arguments
-	 */
-	handleSM(args) {
-		document.getElementById("client_loadingtext").innerHTML = "Loading Music ";
-		this.resetMusiclist();
-
-		for (let i = 1; i < args.length - 1; i++) {
-			// Check when found the song for the first time
-			document.getElementById("client_loadingtext").innerHTML = `Loading Music ${i}/${this.music_list_length}`;
-			this.handleMusicInfo(i-1,safe_tags(args[i]));
-		}
-
-		// Music done, carry on
-		this.sendServer("RD#%");
+		this.sendServer("RMD#" + (musicID+1) + "#%");
 	}
 
 	/**
@@ -1059,7 +990,7 @@ class Client extends EventEmitter {
 	 * 
 	 * @param {Array} args packet arguments
 	 */
-	handleDONE(_args) {
+	handleLCA(_args) {
 		document.getElementById("client_loading").style.display = "none";
 		if (mode === "watch") {		// Spectators don't need to pick a character
 			document.getElementById("client_charselect").style.display = "none";
@@ -1278,6 +1209,7 @@ class Client extends EventEmitter {
 	 * @param {Array} args packet arguments
 	 */
 	handlePC(args) {
+		this.area_list_length = Number(args[2]);
 		this.char_list_length = Number(args[3]);
 		this.music_list_length = Number(args[4]);
 
