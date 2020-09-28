@@ -177,7 +177,7 @@ class Client extends EventEmitter {
 		this.on("CT", this.handleCT.bind(this));
 		this.on("MC", this.handleMC.bind(this));
 		this.on("RMC", this.handleRMC.bind(this));
-		this.on("CI", this.handleCI.bind(this));
+		this.on("CAD", this.handleCAD.bind(this));
 		this.on("SC", this.handleSC.bind(this));
 		this.on("EI", this.handleEI.bind(this));
 		this.on("FL", this.handleFL.bind(this));
@@ -196,7 +196,7 @@ class Client extends EventEmitter {
 		this.on("HI", this.handleHI.bind(this));
 		this.on("ID", this.handleID.bind(this));
 		this.on("PN", this.handlePN.bind(this));
-		this.on("SI", this.handleSI.bind(this));
+		this.on("PC", this.handlePC.bind(this));
 		this.on("ARUP", this.handleARUP.bind(this));
 		this.on("askchaa", this.handleaskchaa.bind(this));
 		this.on("CC", this.handleCC.bind(this));
@@ -845,23 +845,16 @@ class Client extends EventEmitter {
 	}
 
 	/**
-	 * Handles incoming character information, bundling multiple characters
+	 * Handles incoming character information, bundling 2 characters
 	 * per packet.
-	 * CI#0#Phoenix&description&&&&&#1#Miles ...
+	 * CAD#1#Phoenix#0#2#Apollo#0...
 	 * @param {Array} args packet arguments
 	 */
-	handleCI(args) {
-		// Loop through the 10 characters that were sent
-		for (let i = 2; i <= args.length - 2; i++) {
-			if (i % 2 === 0) {
+	handleCAD(args) {
 				document.getElementById("client_loadingtext").innerHTML = `Loading Character ${args[1]}/${this.char_list_length}`;
-				const chargs = args[i].split("&");
-				const charid = args[i - 1];
-				setTimeout(() => this.handleCharacterInfo(chargs, charid), charid*10);
-			}
-		}
-		// Request the next pack
-		this.sendServer("AN#" + ((args[1] / 10) + 1) + "#%");
+				setTimeout(() => this.handleCharacterInfo((args[2]+"&").split('&'), args[1]), args[1]*10);
+				setTimeout(() => this.handleCharacterInfo((args[5]+"&").split('&'), args[4]), args[4]*10);
+		this.sendServer("RCD#" + (args[4]+1) + "#%");
 	}
 
 	/**
@@ -1284,11 +1277,9 @@ class Client extends EventEmitter {
 	 * but we use it as a cue to begin retrieving characters.
 	 * @param {Array} args packet arguments
 	 */
-	handleSI(args) {
-		this.char_list_length = Number(args[1]);
-		this.char_list_length += 1; // some servers count starting from 0 some from 1...
-		this.evidence_list_length = Number(args[2]);
-		this.music_list_length = Number(args[3]);
+	handlePC(args) {
+		this.char_list_length = Number(args[3]);
+		this.music_list_length = Number(args[4]);
 
 		// create the charselect grid, to be filled by the character loader
 		document.getElementById("client_chartable").innerHTML = "";
@@ -1305,12 +1296,7 @@ class Client extends EventEmitter {
 			document.getElementById("client_chartable").appendChild(demothing);
 		}
 
-		// this is determined at the top of this file
-		if (!oldLoading && extrafeatures.includes("fastloading")) {
-			this.sendServer("RC#%");
-		} else {
-			this.sendServer("askchar2#%");
-		}
+		this.sendServer("RCD#1#%");
 	}
 
 	/**
